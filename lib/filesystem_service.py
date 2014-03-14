@@ -27,6 +27,30 @@ class FilesystemService:
             f = self._file(path)
             f.remove(saga.filesystem.RECURSIVE)
 
+    def cat_to_file(self, sources, destination):
+        concat = self._concatenate_sources(sources)
+        output = self._open_file(destination)
+        output.write(concat)
+
+    def cat(self, sources):
+        return self._concatenate_sources(sources)
+
+    def _open_file(self, path):
+        if self._file_exists(path):
+            return self._file(path)
+        else:
+            return self._create_file(path)
+
+    def _concatenate_sources(self, sources):
+        concat = ""
+        for path in sources:
+            f = self._file(path)
+            concat += self._read_file(f)
+        return concat
+
+    def _create_file(self, path):
+        return self._file(path, flags=saga.filesystem.CREATE)
+
     def _is_directory(self, path):
         if self._file_exists(path):
             f = self._file(path)
@@ -75,3 +99,12 @@ class FilesystemService:
         except DoesNotExist:
             exists = False
         return exists
+
+    def _read_file(self, f):
+        # Workaround for Saga-Python issue #314
+        content = None
+        try:
+            content = f.read()
+        except IOError:
+            content = f.read()
+        return content
