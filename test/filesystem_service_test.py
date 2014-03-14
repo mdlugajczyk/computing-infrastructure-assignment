@@ -1,16 +1,18 @@
-from lib.copy_service import CopyService, FileExistsException
+from lib.filesystem_service import FilesystemService
+from lib.filesystem_service import FileExistsException
 from mock import Mock
 import unittest
 from saga.exceptions import DoesNotExist
+import saga
 
-class CopyServiceTest(unittest.TestCase):
+class FilesystemServiceTest(unittest.TestCase):
 
     def setUp(self):
         self._setup_destination()
         self._setup_source_files()
         self._file = Mock(side_effect=self.file_side_effect)
         self._dir = Mock(side_effect=self.directory_side_effect)
-        self._service = CopyService(self._file, self._dir)
+        self._service = FilesystemService(self._file, self._dir)
 
     def test_copy_overwrite_copies_file(self):
         self._service.copy_and_overwrite([self._src1_str, self._src2_str],
@@ -34,6 +36,12 @@ class CopyServiceTest(unittest.TestCase):
         dst = "/some/random/path.py"
         self._service.copy([self._src1_str, self._src2_str], dst)
         self._files_are_copied(dst, self._src1, self._src2)
+
+
+    def test_rm_deletes_all_files(self):
+        self._service.remove([self._src1_str, self._src2_str])
+        self._src1.remove.assert_called_once_with(saga.filesystem.RECURSIVE)
+        self._src2.remove.assert_called_once_with(saga.filesystem.RECURSIVE)
 
     def directory_side_effect(self, arg):
         if arg == self._dst_str:

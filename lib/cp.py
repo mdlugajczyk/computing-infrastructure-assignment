@@ -1,6 +1,7 @@
-import saga
+#!/usr/bin/env python
+
 import sys
-from copy_service import CopyService
+from filesystem_service import FilesystemService
 
 def parse_args():
     src = []
@@ -14,7 +15,7 @@ def parse_args():
     return sys.argv[1:-1], sys.argv[-1], override
 
 def main():
-    service = CopyService(saga.filesystem.File, saga.filesystem.Directory)
+    service = FilesystemService()
     src, dst, override = parse_args()
     if override:
         service.copy_and_overwrite(src, dst)

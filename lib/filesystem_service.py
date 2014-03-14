@@ -1,12 +1,14 @@
 from saga.exceptions import DoesNotExist
+import saga
 
 class FileExistsException(Exception):
     pass
 
     
-class CopyService:
-
-    def __init__(self, file_class, dir_class):
+class FilesystemService:
+    
+    def __init__(self, file_class=saga.filesystem.File,
+                 dir_class=saga.filesystem.Directory):
         self._file = file_class
         self._dir = dir_class
 
@@ -19,6 +21,11 @@ class CopyService:
             self._copy_to_directory(src, dst)
         else:
             self._copy_to_file(src, dst)
+
+    def remove(self, files):
+        for path in files:
+            f = self._file(path)
+            f.remove(saga.filesystem.RECURSIVE)
 
     def _is_directory(self, path):
         if self._file_exists(path):
