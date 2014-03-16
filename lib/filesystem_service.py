@@ -35,6 +35,12 @@ class FilesystemService:
     def cat(self, sources):
         return self._concatenate_sources(sources)
 
+    def list_dir(self, directory_path):
+        content = []
+        for url in self._dir_content(directory_path):
+            content.append(url.path)
+        return content
+
     def _open_file(self, path):
         if self._file_exists(path):
             return self._file(path)

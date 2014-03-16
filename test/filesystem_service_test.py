@@ -59,6 +59,11 @@ class FilesystemServiceTest(unittest.TestCase):
         concat = self._service.cat([self._src1_path, self._src2_path])
         self.assertEquals(concat, self._src1_content + self._src2_content)
 
+    def test_ls_list_dir_content(self):
+        files = self._given_dst_has_files()
+        result = self._service.list_dir(self._dst_path)
+        self.assertEquals(result, files)
+
     def directory_side_effect(self, arg):
         if arg == self._dst_path:
             return self._dst
@@ -133,3 +138,13 @@ class FilesystemServiceTest(unittest.TestCase):
         else:
             self._reads_from_src1 += 1
             raise IOError
+
+    def _given_dst_has_files(self):
+        name1 = "src1"
+        name2 = "src2"
+        url1 = Mock()
+        url1.path = name1
+        url2 = Mock()
+        url2.path = name2
+        self._dst.list.return_value = [url1, url2]
+        return [name1, name2]
