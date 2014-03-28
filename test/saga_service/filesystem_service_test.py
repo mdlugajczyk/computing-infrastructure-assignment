@@ -1,5 +1,5 @@
-from lib.filesystem_service import FilesystemService
-from lib.filesystem_service import FileExistsException
+from lib.saga_service.filesystem_service import FilesystemService
+from lib.saga_service.filesystem_service import FileExistsException
 from mock import Mock
 import unittest
 from saga.exceptions import DoesNotExist
