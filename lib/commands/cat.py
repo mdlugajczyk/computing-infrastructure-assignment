@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from filesystem_service import FilesystemService
+from saga_service.filesystem_service import FilesystemService
 import argparse
 
 def parse_args():

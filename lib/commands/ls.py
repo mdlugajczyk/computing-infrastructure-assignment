@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from filesystem_service import FilesystemService
+from saga_service.filesystem_service import FilesystemService
 
 def parse_args():
     if len(sys.argv) != 2:
