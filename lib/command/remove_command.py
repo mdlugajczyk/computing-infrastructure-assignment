@@ -12,5 +12,4 @@ class RemoveCommand(CommandTemplate):
         
     def execute_command(self):
         service = FilesystemService()
-        print self.args.files
         service.remove(self.args.files)
