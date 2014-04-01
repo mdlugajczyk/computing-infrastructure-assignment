@@ -1,8 +1,6 @@
 from saga.exceptions import DoesNotExist
+from exceptions.file_exists_exception import FileExistsException
 import saga
-
-class FileExistsException(Exception):
-    pass
 
     
 class FilesystemService:
