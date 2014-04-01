@@ -1,0 +1,2 @@
+JOB A cat  ssh://localhost/tmp/workflow-saga-file-1 -o ssh://localhost/tmp/workflow-saga-file-2
+JOB B copy ssh://localhost/tmp/workflow-saga-file-1    ssh://localhost/tmp/workflow-saga-file-3

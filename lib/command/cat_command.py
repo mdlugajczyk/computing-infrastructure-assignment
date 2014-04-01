@@ -4,17 +4,17 @@ import argparse
 
 
 class CatCommand(CommandTemplate):
-    def parse_args(self):
+
+    def parse_args(self, args):
         parser = argparse.ArgumentParser()
         parser.add_argument("-o",
                             help="File to which output will be written.")
         parser.add_argument("inputs", nargs="+")
-        self.args = parser.parse_args()
+        self.args = parser.parse_args(args)
 
     def execute_command(self):
-        service = FilesystemService()
         if self.args.o:
-            service.cat_to_file(self.args.inputs, self.args.o)
+            self._filesystem.cat_to_file(self.args.inputs, self.args.o)
         else:
-            print service.cat(self.args.inputs)
+            print self._filesystem.cat(self.args.inputs)
     

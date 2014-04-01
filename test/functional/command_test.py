@@ -1,18 +1,19 @@
 import unittest
 import shutil
-import time
 from subprocess import call, Popen, PIPE
 import filecmp
 import os
 import shlex
 
-
 class CommandTest(unittest.TestCase):
 
     def setUp(self):
-        current_time = time.time()
-        self.src = "/tmp/functional-test-src-%s" % current_time
-        self.dst = "/tmp/functional-test-dst-%s" % current_time
+        self.src = "/tmp/functional-test-src"
+        self.dst = "/tmp/functional-test-dst"
+        self.workflow_file_1 = "/tmp/workflow-saga-file-1"
+        self.workflow_file_2 = "/tmp/workflow-saga-file-2"
+        self.workflow_file_3 = "/tmp/workflow-saga-file-3"
+        self.remove_files()
 
     def test_cat(self):
         cat_path = "../../cat.py"
@@ -41,8 +42,7 @@ class CommandTest(unittest.TestCase):
         args = shlex.split(cmd)
         output,error = Popen(args,stdout = PIPE,
                              stderr= PIPE).communicate()
-        print self.dst
-        self.assertTrue(output.strip(), file_name)
+        self.assertEqual(output.strip(), file_name)
 
     def test_exec(self):
         exec_path = "../../exec.py"
@@ -51,7 +51,21 @@ class CommandTest(unittest.TestCase):
               "-r", "ssh://localhost", "cat", self.src])
         self.assertTrue(filecmp.cmp(self.src, self.dst))
 
-        
+    def test_workflow_runs_sync_jobs(self):
+        call("cp workflows/sync_jobs.txt /tmp/workflow-saga-file-1".split())
+        call("../../run_workflow.py workflows/sync_jobs.txt".split())
+        self.assertTrue(filecmp.cmp(self.workflow_file_1, self.workflow_file_2))
+        self.assertTrue(filecmp.cmp(self.workflow_file_1, self.workflow_file_3))
 
     def full_path(self, path):
         return "ssh://localhost%s" % path
+
+    def remove_files(self):
+        self.remove_file_or_dir(self.src)
+        self.remove_file_or_dir(self.dst)
+        self.remove_file_or_dir(self.workflow_file_1)
+        self.remove_file_or_dir(self.workflow_file_2)
+        self.remove_file_or_dir(self.workflow_file_3)
+
+    def remove_file_or_dir(self, path):
+        call(["rm", "-rf", path])

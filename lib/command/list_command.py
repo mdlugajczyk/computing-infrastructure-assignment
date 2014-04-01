@@ -7,12 +7,11 @@ from lib.saga_service.filesystem_service import FilesystemService
 
 class ListCommand(CommandTemplate):
 
-    def parse_args(self):
+    def parse_args(self, args):
         parser = argparse.ArgumentParser()
         parser.add_argument("dir_name", help="Directory name")
-        self.args = parser.parse_args()
+        self.args = parser.parse_args(args)
 
     def execute_command(self):
-        service = FilesystemService()
-        for entry in service.list_dir(self.args.dir_name):
+        for entry in self._filesystem.list_dir(self.args.dir_name):
             print entry

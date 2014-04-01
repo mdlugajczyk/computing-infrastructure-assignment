@@ -5,11 +5,11 @@ from lib.saga_service.filesystem_service import FilesystemService
 from lib.command.command_template import CommandTemplate
 
 class RemoveCommand(CommandTemplate):
-    def parse_args(self):
+
+    def parse_args(self, args):
         parser = argparse.ArgumentParser()
         parser.add_argument("files", help="Files to remove.", nargs="+")
-        self.args = parser.parse_args()
+        self.args = parser.parse_args(args)
         
     def execute_command(self):
-        service = FilesystemService()
-        service.remove(self.args.files)
+        self._filesystem.remove(self.args.files)

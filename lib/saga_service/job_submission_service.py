@@ -1,8 +1,11 @@
+from lib.saga_service.filesystem_service import FilesystemService
 import time
+import saga
 
 class JobSubmissionService:
 
-    def __init__(self, saga, saga_job, filesystem):
+    def __init__(self, saga=saga, saga_job=saga.job,
+                 filesystem=FilesystemService()):
         self._saga = saga
         self._saga_job = saga_job
         self._filesystem = filesystem

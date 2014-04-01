@@ -1,0 +1,65 @@
+import unittest
+from lib.workflow.workflow_runner import WorkflowRunner
+from mockito import Mock, verify, when, any
+from mock import mock_open, patch
+
+class WorkflowRunnerTest(unittest.TestCase):
+
+    def setUp(self):
+        self.workflow_file_content = ""
+        self.filesystem = Mock()
+        self.job_submission = Mock()
+        self.workflow_file_path = "/path/to/workflow/file"
+        self.workflow = WorkflowRunner(self.filesystem,
+                                       self.job_submission)
+        when(self.filesystem).list_dir(any()).thenReturn([])
+
+    def test_opens_right_file(self):
+        self.run_workflow()
+        self.open_mocked.assert_called_with(self.workflow_file_path, 'r')
+
+    def test_runs_ls_job(self):
+        self.workflow_file_content = "JOB A ls ssh://localhost/tmp"
+        self.run_workflow()
+        verify(self.filesystem).list_dir("ssh://localhost/tmp")
+
+    def test_runs_cat_job(self):
+        self.workflow_file_content = "JOB B cat ssh://localhost/tmp/file"
+        self.run_workflow()
+        verify(self.filesystem).cat(["ssh://localhost/tmp/file"])
+
+    def test_handles_two_jobs(self):
+        self.workflow_file_content = "JOB A ls ssh://localhost/tmp\n\n"
+        self.workflow_file_content += "\nJOB B cat ssh://localhost/tmp/file"
+        self.run_workflow()
+        verify(self.filesystem).list_dir("ssh://localhost/tmp")
+        verify(self.filesystem).cat(["ssh://localhost/tmp/file"])
+
+    def test_parses_jobs_argument(self):
+        job = "JOB A cat ssh://host/tmp/file1 -o ssh://host/tmp/file2"
+        self.workflow_file_content = job
+        self.run_workflow()
+        verify(self.filesystem).cat_to_file(["ssh://host/tmp/file1"],
+                                             "ssh://host/tmp/file2")
+
+    def test_runs_cp_job(self):
+        job = "JOB B copy ssh://host1/src ssh://host2/dst"
+        self.workflow_file_content = job
+        self.run_workflow()
+        verify(self.filesystem).copy(["ssh://host1/src"], "ssh://host2/dst")
+
+    def test_runs_rm_job(self):
+        self.workflow_file_content = "JOB A rm ssh://host/file"
+        self.run_workflow()
+        verify(self.filesystem).remove(["ssh://host/file"])
+
+    def test_runs_exec_job(self):
+        self.workflow_file_content = "JOB a exec -r ssh://host ls /tmp"
+        self.run_workflow()
+        verify(self.job_submission).submit_job("ls", "/tmp", None,
+                                               None, "ssh://host")
+
+    def run_workflow(self):
+        self.open_mocked = mock_open(read_data=self.workflow_file_content)
+        with patch('__builtin__.open', self.open_mocked):
+            self.workflow.run(self.workflow_file_path)
