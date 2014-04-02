@@ -29,6 +29,7 @@ class FilesystemService:
         concat = self._concatenate_sources(sources)
         output = self._open_file(destination)
         output.write(concat)
+        output.close()
 
     def cat(self, sources):
         return self._concatenate_sources(sources)
@@ -108,6 +109,7 @@ class FilesystemService:
         # Workaround for Saga-Python issue #314
         content = None
         try:
+            content = f.read()
             content = f.read()
         except IOError:
             content = f.read()
