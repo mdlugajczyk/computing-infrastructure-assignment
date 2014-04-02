@@ -67,7 +67,7 @@ class JobSubmissionService:
     def _copy_input_file(self, input_file):
         local_path = self._path_in_staging_directory(input_file)
         dst_path = self._saga_file_path(local_path)
-        self._filesystem.copy_and_overwrite(input_file, dst_path)
+        self._filesystem.copy_and_overwrite([input_file], dst_path)
         self._input_file = local_path
 
     def _handle_output(self, output_file):

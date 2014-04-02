@@ -15,9 +15,10 @@ class JobFactory:
                                   "rm": RemoveCommand,
                                   "exec": ExecCommand}
 
-    def create_job(self, cmd, args):
+    def create_job(self, name, cmd, args):
         cls = self._commands_mapping[cmd]
         command = cls(filesystem=self._filesystem,
                       job_submission=self._job_submission)
         command.parse_args(args.split())
+        command.name = name
         return command

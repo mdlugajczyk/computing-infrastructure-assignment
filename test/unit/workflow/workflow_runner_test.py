@@ -1,6 +1,7 @@
 import unittest
 from lib.workflow.workflow_runner import WorkflowRunner
-from mockito import Mock, verify, when, any
+from lib.exception.file_format_exception import FileFormatException
+from mockito import Mock, verify, when, any, inorder
 from mock import mock_open, patch
 
 class WorkflowRunnerTest(unittest.TestCase):
@@ -59,6 +60,22 @@ class WorkflowRunnerTest(unittest.TestCase):
         verify(self.job_submission).submit_job("ls", "/tmp", None,
                                                None, "ssh://host")
 
+    def test_raise_exception_invalid_file_format(self):
+        self.workflow_file_content = "JOB\nPARENT A CHILD A"
+        try:
+            self.run_workflow()
+            self.assertTrue(False)
+        except FileFormatException:
+            pass
+
+    def test_schedules_job_with_one_child_one_parent(self):
+        self.workflow_file_content = "JOB A ls ssh://host/dir\n"
+        self.workflow_file_content += "JOB B rm ssh://host/file\n"
+        self.workflow_file_content += "PARENT B CHILD A"
+        self.run_workflow()
+        inorder.verify(self.filesystem).remove(["ssh://host/file"])
+        inorder.verify(self.filesystem).list_dir("ssh://host/dir")
+        
     def run_workflow(self):
         self.open_mocked = mock_open(read_data=self.workflow_file_content)
         with patch('__builtin__.open', self.open_mocked):

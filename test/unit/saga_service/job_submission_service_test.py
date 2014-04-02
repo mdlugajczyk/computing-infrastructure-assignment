@@ -52,7 +52,7 @@ class JobSubmissionServiceTest(unittest.TestCase):
         self.given_input_file_is_remote()
         self.submit_job()
         self.assertEqual(self.description.input, "/tmp/" + self.file_name)
-        verify(self.filesystem).copy_and_overwrite(self.input_file,
+        verify(self.filesystem).copy_and_overwrite([self.input_file],
                                                    self.expected_dst)
 
     def test_copies_remote_output_file(self):

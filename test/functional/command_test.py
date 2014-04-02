@@ -35,7 +35,7 @@ class CommandTest(unittest.TestCase):
 
     def test_ls(self):
         ls_path = "../../ls.py"
-        file_name = ls_path[ls_path.rfind('/')+1:]
+        file_name = 'ls.py'
         os.mkdir(self.dst)
         shutil.copy(ls_path, self.dst)
         cmd = "%s %s" % (ls_path, self.full_path(self.dst))
@@ -54,8 +54,19 @@ class CommandTest(unittest.TestCase):
     def test_workflow_runs_sync_jobs(self):
         call("cp workflows/sync_jobs.txt /tmp/workflow-saga-file-1".split())
         call("../../run_workflow.py workflows/sync_jobs.txt".split())
-        self.assertTrue(filecmp.cmp(self.workflow_file_1, self.workflow_file_2))
-        self.assertTrue(filecmp.cmp(self.workflow_file_1, self.workflow_file_3))
+        self.assertTrue(filecmp.cmp(self.workflow_file_1,
+                                    self.workflow_file_2))
+        self.assertTrue(filecmp.cmp(self.workflow_file_1,
+                                    self.workflow_file_3))
+
+    def test_workflow_schedules_jobs(self):
+        call("cp workflows/scheduled_jobs.txt /tmp/workflow-saga-file-1".split())
+        call("../../run_workflow.py workflows/scheduled_jobs.txt".split())
+        self.assertTrue(filecmp.cmp("workflows/scheduled_jobs.txt",
+                                    self.workflow_file_2))
+        self.assertTrue(filecmp.cmp("workflows/scheduled_jobs.txt",
+                                    self.workflow_file_3))
+        self.assertEqual(os.path.isfile(self.workflow_file_1), False)
 
     def full_path(self, path):
         return "ssh://localhost%s" % path

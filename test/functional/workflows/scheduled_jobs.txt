@@ -1,0 +1,6 @@
+JOB A rm ssh://localhost/tmp/workflow-saga-file-1
+JOB B copy ssh://localhost/tmp/workflow-saga-file-2    ssh://localhost/tmp/workflow-saga-file-3
+JOB C cat  ssh://localhost/tmp/workflow-saga-file-1 -o ssh://localhost/tmp/workflow-saga-file-2
+
+PARENT C CHILD B
+PARENT B CHILD A

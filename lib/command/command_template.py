@@ -9,6 +9,7 @@ class CommandTemplate:
                  job_submission=JobSubmissionService()):
         self._filesystem = filesystem
         self._job_submission = job_submission
+        self.name = None
 
     def parse_args(self, args):
         raise Exception("Not implemented")
@@ -25,3 +26,14 @@ class CommandTemplate:
             print "Exiting..."
         except Exception, e:
             print "Exception occured: %s\nExiting..." % e
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+                and self.name == other.name)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self.name)
+                           
