@@ -14,7 +14,7 @@ class WorkflowRunner:
         parsed_jobs, self._relations = self._parser.parse(file_path)
         self._create_jobs(parsed_jobs)
         self._schedule_jobs()
-        self._run_jobs()
+        return self._run_jobs()
 
     def _create_jobs(self, parsed_jobs):
         self._jobs = []
@@ -28,15 +28,30 @@ class WorkflowRunner:
                                                             self._relations)
 
     def _run_jobs(self):
-        for job in self._scheduled_jobs:
-            self._run_job(job)
+        while len(self._scheduled_jobs) > 0:
+            if not self._run_scheduled_job():
+                break
+            self._scheduled_jobs.pop(0)
+        return [job.name for job in self._scheduled_jobs]
 
-    def _run_job(self, job):
+    def _run_scheduled_job(self):
         """
         Run a job, in case of a failure retry after 5 seconds.
         """
-        try:
-            job.execute_command()
-        except Exception:
+        job = self._scheduled_jobs[0]
+        if self._execute(job):
+            return True
+        else:
+            print "Retrying to run the job in 5 seconds..."
             time.sleep(5)
+            return self._execute(job)
+
+    def _execute(self, job):
+        success = False
+        try:
+            print "Running job: %s" % job.name
             job.execute_command()
+            success = True
+        except Exception, e:
+            print "Job %s failed (%s)." % (job.name, str(e))
+        return success

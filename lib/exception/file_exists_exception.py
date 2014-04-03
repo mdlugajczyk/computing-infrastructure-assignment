@@ -1,2 +1,4 @@
 class FileExistsException(Exception):
-    pass
+
+    def __init__(self):
+        super(FileExistsException, self).__init__("File aready exists.")

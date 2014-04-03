@@ -100,9 +100,18 @@ class WorkflowRunnerTest(unittest.TestCase):
         verify(self.filesystem, times=2).list_dir("ssh://host/dir")
         self.sleep_mocked.assert_called_once_with(5)
         verify(self.filesystem).remove(["ssh://host/file"])
+
+    def test_returns_statistics_about_failed_jobs(self):
+        when(self.filesystem).remove(["ssh://host/file"]).thenRaise(Exception)
+        self.workflow_file_content = "JOB A ls ssh://host/dir\n"
+        self.workflow_file_content += "JOB B rm ssh://host/file\n"
+        self.workflow_file_content += "JOB C cat ssh://host/file2"
+        stats = self.run_workflow()
+        self.assertEqual(stats, ['B', 'C'])
+
         
     def run_workflow(self):
         self.open_mocked = mock_open(read_data=self.workflow_file_content)
         with patch('__builtin__.open', self.open_mocked):
             with patch('time.sleep', self.sleep_mocked):
-                self.workflow.run(self.workflow_file_path)
+                return self.workflow.run(self.workflow_file_path)

@@ -15,5 +15,7 @@ class WorkflowCommand(CommandTemplate):
         self.args = parser.parse_args(args)
 
     def execute_command(self):
-        self.workflow_runner.run(self.args.input_file)
+        failed_jobs = self.workflow_runner.run(self.args.input_file)
+        if failed_jobs:
+            print "Following jobs have not been executed: %s" % failed_jobs
         
