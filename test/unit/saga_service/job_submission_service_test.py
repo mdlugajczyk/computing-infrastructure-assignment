@@ -39,9 +39,9 @@ class JobSubmissionServiceTest(unittest.TestCase):
         verify(self.job).wait()
 
     def test_sets_job_output(self):
-        expected_output = "/tmp/s210664-saga-output-%s" % self.current_time
         self.submit_job()
-        self.assertEqual(self.description.output, expected_output)
+        self.assertEqual(self.description.output,
+                         self.get_local_output_file())
 
     def test_sets_local_input_file(self):
         self.input_file = "/local/file/name"
@@ -51,7 +51,7 @@ class JobSubmissionServiceTest(unittest.TestCase):
     def test_copies_remote_input_file(self):
         self.given_input_file_is_remote()
         self.submit_job()
-        self.assertEqual(self.description.input, "/tmp/" + self.file_name)
+        self.assertEqual(self.description.input, self.tmp_input_file)
         verify(self.filesystem).copy_and_overwrite([self.input_file],
                                                    self.expected_dst)
 
@@ -106,7 +106,8 @@ class JobSubmissionServiceTest(unittest.TestCase):
     def given_input_file_is_remote(self):
         self.file_name = "file"
         self.input_file = "ssh://some-host/path-to/" + self.file_name
-        self.expected_dst = self.connection_string + "/tmp/" + self.file_name
+        self.tmp_input_file = "/tmp/s210664-saga-tmp-input-file-%s" % self.current_time
+        self.expected_dst = self.connection_string + self.tmp_input_file
 
     def wont_copy_file(self):
         when_copy =  when(self.filesystem).copy_and_overwrite(any(), any())
@@ -115,7 +116,6 @@ class JobSubmissionServiceTest(unittest.TestCase):
     def given_output_file_is_remote(self):
         file_name = "output-file"
         self.output_file = "ssh://some-host/path/to/" + file_name
-        self.expected_dst = self.connection_string + "/tmp/" + file_name
 
     def get_local_output_file(self):
-        return "/tmp/s210664-saga-output-%s" % self.current_time
+        return "/tmp/s210664-saga-tmp-output-file-%s" % self.current_time

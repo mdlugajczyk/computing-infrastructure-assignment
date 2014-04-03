@@ -14,13 +14,19 @@ class JobSubmissionService:
     def submit_job(self, command, arguments, input_file,
                    output_file, connection_string):
         self._connection_string = connection_string
+        self._prepare_input_output(input_file, output_file)
+        self._run_job(command, arguments)
+        self._handle_output(output_file)
+        return self._job_output
+
+    def _prepare_input_output(self, input_file, output_file):
         self._prepare_input_file(input_file)
         self._set_output_file(output_file)
+        
+    def _run_job(self, command, arguments):
         job = self._create_job(command, arguments)
         job.run()
         job.wait()
-        self._handle_output(output_file)
-        return self._job_output
 
     def _create_job(self, command, arguments):
         session = self._get_session()
@@ -45,27 +51,25 @@ class JobSubmissionService:
         return jd
 
     def _set_output_file(self, output_file):
-        if output_file is not None and self._is_local_file(output_file):
+        is_local_file = (output_file is not None
+                         and self._is_local_file(output_file))
+        if is_local_file:
             self._job_output_file = output_file
         else:
-            current_time = time.time()        
-            self._job_output_file = "/tmp/s210664-saga-output"
-            self._job_output_file += "-%s" % current_time
+            self._job_output_file = self._get_tmp_output_file()
     
     def _prepare_input_file(self, input_file):
-        if input_file is None:
-            self._input_file =  None
-        elif self._is_local_file(input_file):
+        if input_file is None or self._is_local_file(input_file):
             self._input_file = input_file
         else:
             self._copy_input_file(input_file)
 
     def _is_local_file(self, file_path):
-        host_index = file_path.find("://")
-        return host_index == -1
+        host_separator_index = file_path.find("://")
+        return host_separator_index == -1
 
     def _copy_input_file(self, input_file):
-        local_path = self._path_in_staging_directory(input_file)
+        local_path = self._get_tmp_input_file()
         dst_path = self._saga_file_path(local_path)
         self._filesystem.copy_and_overwrite([input_file], dst_path)
         self._input_file = local_path
@@ -86,9 +90,15 @@ class JobSubmissionService:
     def _saga_file_path(self, path):
         return self._connection_string + path
 
-    def _path_in_staging_directory(self, path):
-        return "/tmp" + path[path.rfind("/"):]
-
     def _capture_job_output(self):
         path = self._connection_string + self._job_output_file
         self._job_output = self._filesystem.cat([path])
+
+    def _get_tmp_output_file(self):
+        return self._unique_path("/tmp/s210664-saga-tmp-output-file")
+
+    def _get_tmp_input_file(self):
+        return self._unique_path("/tmp/s210664-saga-tmp-input-file")
+
+    def _unique_path(self, path):
+        return "%s-%s" % (path, time.time())
