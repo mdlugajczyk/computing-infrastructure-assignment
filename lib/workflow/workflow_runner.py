@@ -1,7 +1,7 @@
 from lib.workflow.workflow_parser import WorkflowParser
 from lib.workflow.job_factory import JobFactory
 from lib.workflow.job_scheduler import JobScheduler
-
+import time
 
 class WorkflowRunner:
 
@@ -29,5 +29,14 @@ class WorkflowRunner:
 
     def _run_jobs(self):
         for job in self._scheduled_jobs:
+            self._run_job(job)
+
+    def _run_job(self, job):
+        """
+        Run a job, in case of a failure retry after 5 seconds.
+        """
+        try:
             job.execute_command()
-            
+        except Exception:
+            time.sleep(5)
+            job.execute_command()

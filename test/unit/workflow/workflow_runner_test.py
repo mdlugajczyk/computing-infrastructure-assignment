@@ -2,11 +2,12 @@ import unittest
 from lib.workflow.workflow_runner import WorkflowRunner
 from lib.exception.file_format_exception import FileFormatException
 from mockito import Mock, verify, when, any, inorder
-from mock import mock_open, patch
+from mock import mock_open, patch, Mock as mock_Mock
 
 class WorkflowRunnerTest(unittest.TestCase):
 
     def setUp(self):
+        self.sleep_mocked = mock_Mock()
         self.workflow_file_content = ""
         self.filesystem = Mock()
         self.job_submission = Mock()
@@ -89,8 +90,19 @@ class WorkflowRunnerTest(unittest.TestCase):
         inorder.verify(self.filesystem).cat(["ssh://host/file2"])
         inorder.verify(self.filesystem).list_dir("ssh://host/dir")
         inorder.verify(self.filesystem).list_dir("ssh://host/dir2")
+
+    def test_retries_run_failed_jobs(self):
+        when_list = when(self.filesystem).list_dir("ssh://host/dir")
+        when_list.thenRaise(Exception).thenReturn("")
+        self.workflow_file_content = "JOB A ls ssh://host/dir\n"
+        self.workflow_file_content += "JOB B rm ssh://host/file\n"
+        self.run_workflow()
+        verify(self.filesystem, times=2).list_dir("ssh://host/dir")
+        self.sleep_mocked.assert_called_once_with(5)
+        verify(self.filesystem).remove(["ssh://host/file"])
         
     def run_workflow(self):
         self.open_mocked = mock_open(read_data=self.workflow_file_content)
         with patch('__builtin__.open', self.open_mocked):
-            self.workflow.run(self.workflow_file_path)
+            with patch('time.sleep', self.sleep_mocked):
+                self.workflow.run(self.workflow_file_path)
