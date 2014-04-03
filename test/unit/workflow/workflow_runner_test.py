@@ -75,6 +75,20 @@ class WorkflowRunnerTest(unittest.TestCase):
         self.run_workflow()
         inorder.verify(self.filesystem).remove(["ssh://host/file"])
         inorder.verify(self.filesystem).list_dir("ssh://host/dir")
+
+    def test_schedules_job_with_two_children(self):
+        self.workflow_file_content = "JOB A ls ssh://host/dir\n"
+        self.workflow_file_content += "JOB B rm ssh://host/file\n"
+        self.workflow_file_content += "JOB C ls ssh://host/dir2\n"
+        self.workflow_file_content += "JOB D cat ssh://host/file2\n"
+        self.workflow_file_content += "PARENT B D CHILD A C\n"
+        self.workflow_file_content += "PARENT B CHILD D \n"
+        self.workflow_file_content += "PARENT A CHILD C\n"
+        self.run_workflow()
+        inorder.verify(self.filesystem).remove(["ssh://host/file"])
+        inorder.verify(self.filesystem).cat(["ssh://host/file2"])
+        inorder.verify(self.filesystem).list_dir("ssh://host/dir")
+        inorder.verify(self.filesystem).list_dir("ssh://host/dir2")
         
     def run_workflow(self):
         self.open_mocked = mock_open(read_data=self.workflow_file_content)

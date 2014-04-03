@@ -14,10 +14,9 @@ class JobScheduler:
         for vertex in vertices:
             mapping[vertex.name] = vertex
         edges = []
-        for edge in relations:
-            src = edge[0]
-            dst = edge[1]
-            edges.append((mapping[src], mapping[dst]))
+        for rel in relations:
+            for parent in rel[0]:
+                for child in rel[1]:
+                    edges.append((mapping[parent], mapping[child]))
         return edges
-
     

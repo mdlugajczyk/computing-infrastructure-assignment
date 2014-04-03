@@ -13,6 +13,7 @@ class CommandTest(unittest.TestCase):
         self.workflow_file_1 = "/tmp/workflow-saga-file-1"
         self.workflow_file_2 = "/tmp/workflow-saga-file-2"
         self.workflow_file_3 = "/tmp/workflow-saga-file-3"
+        self.workflow_file_4 = "/tmp/workflow-saga-file-4"
         self.remove_files()
 
     def test_cat(self):
@@ -68,6 +69,17 @@ class CommandTest(unittest.TestCase):
                                     self.workflow_file_3))
         self.assertEqual(os.path.isfile(self.workflow_file_1), False)
 
+    # expected job order: E -> C -> A -> B -> D -> F
+    def test_workflow_handle_many_children_many_parent_relationships(self):
+        call("cp workflows/scheduled_jobs.txt /tmp/workflow-saga-file-1".split())
+        call("../../run_workflow.py workflows/many_children_many_parents.txt".split())
+        self.assertTrue(filecmp.cmp("workflows/scheduled_jobs.txt",
+                                    self.workflow_file_2))
+        self.assertTrue(filecmp.cmp("workflows/scheduled_jobs.txt",
+                                    self.workflow_file_3))
+        self.assertTrue(os.path.isfile(self.workflow_file_4))
+        self.assertEqual(os.path.isfile(self.workflow_file_1), False)
+
     def full_path(self, path):
         return "ssh://localhost%s" % path
 
@@ -77,6 +89,7 @@ class CommandTest(unittest.TestCase):
         self.remove_file_or_dir(self.workflow_file_1)
         self.remove_file_or_dir(self.workflow_file_2)
         self.remove_file_or_dir(self.workflow_file_3)
+        self.remove_file_or_dir(self.workflow_file_4)
 
     def remove_file_or_dir(self, path):
         call(["rm", "-rf", path])

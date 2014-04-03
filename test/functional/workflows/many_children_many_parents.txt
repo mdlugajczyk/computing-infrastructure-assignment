@@ -1,0 +1,14 @@
+JOB A exec -stdin ssh://localhost/tmp/workflow-saga-file-3 -stdout /tmp/workflow-saga-file-4 -r ssh://localhost grep JOB
+JOB C copy ssh://localhost/tmp/workflow-saga-file-2 ssh://localhost/tmp/workflow-saga-file-3
+JOB E cat ssh://localhost/tmp/workflow-saga-file-1 -o ssh://localhost/tmp/workflow-saga-file-2
+JOB B exec -stdin /tmp/workflow-saga-file-4 -r ssh://localhost rm
+JOB D exec -r ssh://localhost cp /tmp/workflow-saga-file-1 /tmp-workflow-saga-file-4
+JOB F rm ssh://localhost/tmp/workflow-saga-file-1
+
+PARENT E CHILD C A
+PARENT C CHILD A
+PARENT A B CHILD D
+PARENT A CHILD B
+PARENT B CHILD F
+
+

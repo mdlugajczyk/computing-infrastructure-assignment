@@ -20,17 +20,20 @@ class WorkflowParser:
         self._relations = []
         try:
             self._try_parse_statements()
-        except IndexError:
+        except Exception:
             raise FileFormatException
 
     def _try_parse_statements(self):
         for stmt in self._statements:
-            if len(stmt) == 0:
-                continue
-            elif self._is_job_definition(stmt):
-                self._parse_job(stmt)
-            elif self._is_relation_definition(stmt):
-                self._parse_relation(stmt)
+            self._parse_statement(stmt)
+
+    def _parse_statement(self, stmt):
+        if len(stmt) == 0:
+            return
+        elif self._is_job_definition(stmt):
+            self._parse_job(stmt)
+        elif self._is_relation_definition(stmt):
+            self._parse_relation(stmt)
 
     def _parse_job(self, job):
         name = job[1]
@@ -39,11 +42,10 @@ class WorkflowParser:
         self._jobs.append((name, cmd, " ".join(args)))
 
     def _parse_relation(self, rel):
-        parent = rel[1]
-        if rel[2] != 'CHILD':
-            raise FileFormatException
-        child = rel[3]
-        self._relations.append((parent, child))
+        child_index = rel.index("CHILD")
+        parents = rel[1:child_index]
+        children = rel[child_index+1:]
+        self._relations.append((parents, children))
 
     def _is_job_definition(self, stmt):
         return stmt[0] == "JOB"
