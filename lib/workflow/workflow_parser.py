@@ -18,14 +18,14 @@ class WorkflowParser:
     def _parse_statements(self):
         self._jobs = []
         self._relations = []
-        try:
-            self._try_parse_statements()
-        except Exception:
-            raise FileFormatException
+        self._try_parse_statements()
 
     def _try_parse_statements(self):
         for stmt in self._statements:
-            self._parse_statement(stmt)
+            try:
+                self._parse_statement(stmt)
+            except Exception:
+                raise FileFormatException("Invalid statement: %s" % stmt)
 
     def _parse_statement(self, stmt):
         if len(stmt) == 0:

@@ -1,3 +1,6 @@
+from lib.exception.dag_cycle_exception import DAGCycleException
+
+
 class DAG:
 
     def __init__(self, vertices, edges):
@@ -16,7 +19,7 @@ class DAG:
 
     def _visit(self, v):
         if self._tmp_marked_nodes[v]:
-            raise Exception
+            raise DAGCycleException
         if not self._marked_nodes[v]:
             self._tmp_marked_nodes[v] = True
             for w in self._adj_list[v]:
