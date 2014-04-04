@@ -1,8 +1,20 @@
 from lib.exception.file_format_exception import FileFormatException
 
 class WorkflowParser:
+    """
+    Parser for the workflow file.
+
+    Each statement has to be either JOB or PARENT/CHILD statement.
+    JOB name command arguments
+    PARENT parent-job CHILD child-job1 child-job2
+    """
 
     def parse(self, file_path):
+        """
+        Parses workflow file.
+
+        :param file_path: Path to the workflow file to parse.
+        """
         self._read_file(file_path)
         self._extract_lines()
         self._parse_statements()

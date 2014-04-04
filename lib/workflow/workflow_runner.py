@@ -4,13 +4,32 @@ from lib.workflow.job_scheduler import JobScheduler
 import time
 
 class WorkflowRunner:
+    """
+    Runs the jobs specified in workflow file.
+    """
 
     def __init__(self, filesystem, job_submission):
+        """
+        Creates new instance of WorkflowRunner.
+
+        :param filesystem: Service for performing operations of filesystem.
+        :param job_submission: Service for submitting jobs. 
+        """
         self._parser = WorkflowParser()
         self._job_factory = JobFactory(filesystem, job_submission)
         self._job_scheduler = JobScheduler()
 
     def run(self, file_path):
+        """
+        Runs jobs from workflow file.
+
+        Jobs are scheduled according to PARENT/CHILD relationships from
+        workflow file. If job fails, it's re-run after 5 seconds.
+        If second attempt also fails, execution of the workflow stops.
+
+        :param file_path: Path to the workflow file.
+        :returns List of unfinished jobs.
+        """
         parsed_jobs, self._relations = self._parser.parse(file_path)
         self._create_jobs(parsed_jobs)
         self._schedule_jobs()

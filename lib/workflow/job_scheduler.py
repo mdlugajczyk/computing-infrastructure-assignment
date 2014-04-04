@@ -1,8 +1,19 @@
 from lib.workflow.dag.dag import DAG
 
 class JobScheduler:
+    """
+    Schedules jobs from workfow file.
+    """
 
     def schedule(self, jobs, relations):
+        """
+        Schedules jobs by building a graph from relationship
+        and sorting it topologically.
+
+        :param jobs: Jobs to sort.
+        :param relations: List of Parent/Child relations.
+        :type relations: List of pairs of lists
+        """
         graph = self._build_graph(jobs, relations)
         return graph.sort()
 

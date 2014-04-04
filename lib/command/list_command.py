@@ -6,6 +6,9 @@ from lib.saga_service.filesystem_service import FilesystemService
 
 
 class ListCommand(CommandTemplate):
+    """
+    A UNIX like ls command for listing remote directory content.
+    """
 
     def parse_args(self, args):
         parser = argparse.ArgumentParser()

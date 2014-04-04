@@ -3,6 +3,12 @@ from lib.command.command_template import CommandTemplate
 import argparse
 
 class WorkflowCommand(CommandTemplate):
+    """
+    Utility for running a workflow on remote hosts.
+
+    Parses a workflow file and runs jobs in order specified
+    by the PARENT/CHILD relationship.
+    """
 
     def __init__(self):
         CommandTemplate.__init__(self)

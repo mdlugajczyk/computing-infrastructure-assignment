@@ -4,37 +4,83 @@ import saga
 
     
 class FilesystemService:
+    """
+    Service for performing fielsystem operations on GRID.
+
+    It's implemented using Saga library.
+    """
     
     def __init__(self, file_class=saga.filesystem.File,
                  dir_class=saga.filesystem.Directory):
+        """
+        Creates a new instance of FilesystemService.
+
+        :param file_class: Class for performing operations on remote files.
+        :param dir_class: Class for performing operations on remote directories.
+        """
         self._file = file_class
         self._dir = dir_class
 
-    def copy_and_overwrite(self, src, dst):
-        for path in src:
+    def copy_and_overwrite(self, sources, dst):
+        """
+        Copies files to destination, which can be either file or directory.
+        If destination exists, it will be overwritten.
+
+        :param sources: List of files to be copied
+        :param dst: Destination to which files will be copied.
+        """
+        for path in sources:
             self._copy_file(path, dst)
 
-    def copy(self, src, dst):
+    def copy(self, sources, dst):
+        """
+        Copies files to destination, which can be either file or directory.
+        If destination exists, it will raise and exception.
+
+        :param sources: List of files to be copied
+        :param dst: Destination to which files will be copied.
+        """
         if self._is_directory(dst):
-            self._copy_to_directory(src, dst)
+            self._copy_to_directory(sources, dst)
         else:
-            self._copy_to_file(src, dst)
+            self._copy_to_file(sources, dst)
 
     def remove(self, files):
+        """
+        Removes files.
+
+        :param files: List of files to be removed.
+        """
         for path in files:
             f = self._file(path)
             f.remove(saga.filesystem.RECURSIVE)
 
     def cat_to_file(self, sources, destination):
+        """
+        Concatenates files and writes the result to destination.
+
+        :param sources: List of files to concatenate.
+        :param destination: File to which result will be written.
+        """
         concat = self._concatenate_sources(sources)
         output = self._open_file(destination)
         output.write(concat)
         output.close()
 
     def cat(self, sources):
+        """
+        Concatenates files and returns the result.
+
+        :param source: List of files to concatenate.
+        """
         return self._concatenate_sources(sources)
 
     def list_dir(self, directory_path):
+        """
+        Lists content of a directory.
+
+        :param directory_path: Path to a directory.
+        """
         content = []
         for url in self._dir_content(directory_path):
             content.append(url.path)
@@ -63,8 +109,8 @@ class FilesystemService:
         else:
             return False
 
-    def _copy_to_file(self, src, dst):
-        for f in src:
+    def _copy_to_file(self, sources, dst):
+        for f in sources:
             if self._will_overwrite_file(f, dst):
                 raise FileExistsException
             self._copy_file(f, dst)
@@ -72,9 +118,9 @@ class FilesystemService:
     def _will_overwrite_file(self, src, dst):
         return self._file_exists(dst)
             
-    def _copy_to_directory(self, src, dst):
+    def _copy_to_directory(self, sources, dst):
         dst_files = self._dir_content(dst)
-        for file_path in src:
+        for file_path in sources:
             if self._file_exists_in_directory(file_path, dst_files):
                 raise FileExistsException
             self._copy_file(file_path, dst)

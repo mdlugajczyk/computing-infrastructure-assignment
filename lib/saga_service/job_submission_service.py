@@ -3,9 +3,21 @@ import time
 import saga
 
 class JobSubmissionService:
+    """
+    Service for submitting jobs into the GRID.
+
+    Supports submitting jobs over ssh.
+    """
 
     def __init__(self, saga=saga, saga_job=saga.job,
                  filesystem=FilesystemService()):
+        """
+        Creates new instance of JobSubmissionService.
+
+        :param saga: Saga module.
+        :param saga_job: Saga job module.
+        :param filesystem: Service for performing filesystem operations.
+        """
         self._saga = saga
         self._saga_job = saga_job
         self._filesystem = filesystem
@@ -13,6 +25,23 @@ class JobSubmissionService:
 
     def submit_job(self, command, arguments, input_file,
                    output_file, connection_string):
+        """
+        Submits a job to the GRID.
+
+        If input file is specified it's set as job's argument.
+        Remote input file is copied to staging directory.
+
+        If not output file is specified, method returns job output.
+        If output file is a remote file, it'll be copied.
+        
+        Temporary files (input/output) are staged to /tmp directory.
+
+        :param command: Command to invoke.
+        :param arguments: Command's arguments.
+        :param input_file: Optional command's input file.
+        :param output_file: Optional command's output file.
+        :param connetion_string: String specifying how to connect to remote host. 
+        """
         self._connection_string = connection_string
         self._prepare_input_output(input_file, output_file)
         self._run_job(command, arguments)

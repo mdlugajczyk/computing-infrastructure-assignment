@@ -3,6 +3,11 @@ from lib.saga_service.filesystem_service import FilesystemService
 from lib.command.command_template import CommandTemplate
 
 class CopyCommand(CommandTemplate):
+    """
+    A Unix like copy command for copying files between remote hosts.
+
+    Doesn't support copying directories.
+    """
 
     def parse_args(self, args):
         parser = argparse.ArgumentParser()

@@ -7,6 +7,9 @@ import argparse
 
 
 class ExecCommand(CommandTemplate):
+    """
+    Utility for executing remote jobs on the GRID.
+    """
     
     def parse_args(self, args):
         parser = argparse.ArgumentParser()

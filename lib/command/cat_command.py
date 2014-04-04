@@ -4,6 +4,12 @@ import argparse
 
 
 class CatCommand(CommandTemplate):
+    """
+    A Unix like, cat command for concatenating and printing files using SAGA
+    as a backend.
+
+    Result can be displayed to stdout or saved to a file.
+    """
 
     def parse_args(self, args):
         parser = argparse.ArgumentParser()

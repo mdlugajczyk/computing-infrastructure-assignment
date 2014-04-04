@@ -2,13 +2,29 @@ from lib.exception.dag_cycle_exception import DAGCycleException
 
 
 class DAG:
+    """
+    Representation of directed acyclic graph.
+
+    Internally graph is presented as a adjacency list.
+    """
 
     def __init__(self, vertices, edges):
+        """
+        Creates new instance of DAG.
+
+        :param vertices: List of graph's vertices.
+        :param edges: List of graphs's edges.
+        """
         self.vertices = vertices
         self.edges = edges
         self._build_adj_list()
 
     def sort(self):
+        """
+        Performs topological sorting of DAG.
+
+        :returns List of topologically sorted vertices.        
+        """
         self._setup()
 
         while len(self._unmakred_nodes) > 0:
